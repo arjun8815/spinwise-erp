@@ -8,6 +8,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
 import Production from "@/pages/Production";
+import Inventory from "@/pages/Inventory";
+import Quality from "@/pages/Quality";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -80,10 +82,7 @@ const App = () => (
               path="/inventory" 
               element={
                 <Layout>
-                  <div className="p-8 text-center">
-                    <h1 className="text-2xl font-bold">Inventory Module</h1>
-                    <p className="text-muted-foreground mt-2">This module will be implemented in the next update.</p>
-                  </div>
+                  <Inventory />
                 </Layout>
               } 
             />
@@ -91,10 +90,7 @@ const App = () => (
               path="/quality" 
               element={
                 <Layout>
-                  <div className="p-8 text-center">
-                    <h1 className="text-2xl font-bold">Quality Module</h1>
-                    <p className="text-muted-foreground mt-2">This module will be implemented in the next update.</p>
-                  </div>
+                  <Quality />
                 </Layout>
               } 
             />
