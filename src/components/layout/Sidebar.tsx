@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -11,7 +10,12 @@ import {
   Phone, 
   Settings,
   Home,
-  FileCheck
+  FileCheck,
+  Wind,
+  RotateCw,
+  Cog,
+  Gauge,
+  ScanBarcode
 } from "lucide-react";
 
 interface SidebarItemProps {
@@ -19,9 +23,69 @@ interface SidebarItemProps {
   label: string;
   to: string;
   active: boolean;
+  children?: SidebarItemProps[];
+  expanded?: boolean;
+  onToggle?: () => void;
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, to, active }) => {
+const SidebarItem: React.FC<SidebarItemProps> = ({ 
+  icon, 
+  label, 
+  to, 
+  active,
+  children,
+  expanded,
+  onToggle
+}) => {
+  if (children) {
+    return (
+      <div className="space-y-1">
+        <button
+          onClick={onToggle}
+          className={cn(
+            "flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+            active 
+              ? "bg-textile-100 text-textile-500 font-medium" 
+              : "text-gray-600 hover:bg-textile-50 hover:text-textile-500"
+          )}
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-5 w-5">{icon}</div>
+            <span>{label}</span>
+          </div>
+          <svg
+            className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {expanded && (
+          <div className="pl-10 space-y-1">
+            {children.map((child, index) => (
+              <Link
+                key={index}
+                to={child.to}
+                className={cn(
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                  child.active 
+                    ? "bg-textile-100 text-textile-500 font-medium" 
+                    : "text-gray-600 hover:bg-textile-50 hover:text-textile-500"
+                )}
+              >
+                <div className="h-4 w-4">{child.icon}</div>
+                <span>{child.label}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  
   return (
     <Link
       to={to}
@@ -41,8 +105,19 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, to, active }) =>
 const Sidebar: React.FC = () => {
   const { t } = useLanguage();
   const location = useLocation();
+  const [expandedItems, setExpandedItems] = React.useState<Record<string, boolean>>({
+    production: location.pathname.startsWith("/production")
+  });
   
   const isActive = (path: string) => location.pathname === path;
+  const isActiveGroup = (prefix: string) => location.pathname.startsWith(prefix);
+
+  const toggleExpand = (key: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   return (
     <div className="hidden md:flex h-screen w-64 flex-col border-r bg-white">
@@ -66,7 +141,41 @@ const Sidebar: React.FC = () => {
             icon={<Factory className="h-5 w-5" />} 
             label={t("production")} 
             to="/production" 
-            active={isActive("/production")} 
+            active={isActiveGroup("/production")}
+            expanded={expandedItems.production}
+            onToggle={() => toggleExpand("production")}
+            children={[
+              {
+                icon: <Gauge className="h-4 w-4" />,
+                label: t("performance"),
+                to: "/production/performance",
+                active: isActive("/production/performance")
+              },
+              {
+                icon: <RotateCw className="h-4 w-4" />,
+                label: t("machinery"),
+                to: "/production/machinery",
+                active: isActive("/production/machinery")
+              },
+              {
+                icon: <Wind className="h-4 w-4" />,
+                label: t("processes"),
+                to: "/production/processes",
+                active: isActive("/production/processes")
+              },
+              {
+                icon: <Cog className="h-4 w-4" />,
+                label: t("maintenance"),
+                to: "/production/maintenance",
+                active: isActive("/production/maintenance")
+              },
+              {
+                icon: <ScanBarcode className="h-4 w-4" />,
+                label: t("tracking"),
+                to: "/production/tracking",
+                active: isActive("/production/tracking")
+              }
+            ]}
           />
           <SidebarItem 
             icon={<Package className="h-5 w-5" />} 

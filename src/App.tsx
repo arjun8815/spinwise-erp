@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Layout from "@/components/layout/Layout";
 import Dashboard from "@/pages/Dashboard";
+import Production from "@/pages/Production";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,10 +32,47 @@ const App = () => (
               path="/production" 
               element={
                 <Layout>
-                  <div className="p-8 text-center">
-                    <h1 className="text-2xl font-bold">Production Module</h1>
-                    <p className="text-muted-foreground mt-2">This module will be implemented in the next update.</p>
-                  </div>
+                  <Production />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/production/performance" 
+              element={
+                <Layout>
+                  <Production />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/production/machinery" 
+              element={
+                <Layout>
+                  <Production />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/production/processes" 
+              element={
+                <Layout>
+                  <Production />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/production/maintenance" 
+              element={
+                <Layout>
+                  <Production />
+                </Layout>
+              } 
+            />
+            <Route 
+              path="/production/tracking" 
+              element={
+                <Layout>
+                  <Production />
                 </Layout>
               } 
             />
