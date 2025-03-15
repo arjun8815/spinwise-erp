@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
@@ -125,7 +126,7 @@ const Sidebar: React.FC = () => {
         <div className="flex items-center gap-2">
           <Factory className="h-6 w-6 text-textile-500" />
           <span className="font-semibold text-xl text-textile-500">
-            SpinWise ERP
+            NSN SpinTech
           </span>
         </div>
       </div>

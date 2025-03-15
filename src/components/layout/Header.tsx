@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           to="/" 
           className="flex items-center gap-2 font-semibold text-lg text-textile-600 md:hidden"
         >
-          SpinWise ERP
+          NSN SpinTech
         </Link>
       </div>
 

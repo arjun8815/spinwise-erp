@@ -15,8 +15,15 @@ import { Progress } from "@/components/ui/progress";
 import ProductionMetricsChart from "./ProductionMetricsChart";
 import MachineStatusCard from "./MachineStatusCard";
 
-// Mock data - would be replaced with real data in production
-const machineStatuses = [
+// Mock data with proper type definitions
+const machineStatuses: Array<{
+  id: number;
+  name: string;
+  status: "running" | "warning" | "error" | "idle";
+  efficiency: number;
+  output?: string;
+  alert?: string;
+}> = [
   { id: 1, name: "Bale Opener", status: "running", efficiency: 92, output: "450 kg/h" },
   { id: 2, name: "Carding Machine", status: "idle", efficiency: 0, alert: "Maintenance required" },
   { id: 3, name: "Drawing Frame", status: "running", efficiency: 87, output: "420 kg/h" },
