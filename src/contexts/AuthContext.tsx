@@ -81,6 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching profile for user ID:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -92,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
+      console.log("Profile data:", data);
       setProfile(data as UserProfile);
     } catch (error) {
       console.error("Profile fetch error:", error);
@@ -110,6 +112,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   ) => {
     try {
+      console.log("Signing up with data:", { email, userData });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -118,19 +122,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             first_name: userData.first_name,
             last_name: userData.last_name,
             phone: userData.phone,
-            preferred_language: userData.preferred_language,
-            role: userData.role,
+            preferred_language: userData.preferred_language || "english",
+            role: userData.role || "employee",
           },
         },
       });
 
       if (error) {
+        console.error("Sign up error:", error);
         toast({
           title: "Sign up failed",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log("Sign up successful:", data);
         toast({
           title: "Sign up successful",
           description: "Please check your email for verification.",
@@ -139,6 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       return { data, error };
     } catch (error: any) {
+      console.error("Unexpected sign up error:", error);
       return { data: null, error };
     }
   };
