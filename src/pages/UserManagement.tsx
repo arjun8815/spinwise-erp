@@ -68,6 +68,13 @@ type UserProfileData = {
   updated_at?: string;
 };
 
+interface SupabaseUserData {
+  users: Array<{
+    id: string;
+    email?: string;
+  }>;
+}
+
 const userFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
   firstName: z.string().min(1, { message: "First name is required" }),
@@ -156,20 +163,16 @@ const UserManagement: React.FC = () => {
         return;
       }
       
-      // Get user emails from auth.users
       const userProfiles = data as UserProfileData[];
       const userIds = userProfiles.map(profile => profile.id);
       
-      // Only fetch emails if we have user profiles
       if (userIds.length > 0) {
-        // Attempt to get user data
         try {
           const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
           
           if (userError) {
             console.error("Error fetching user emails:", userError);
             
-            // Fallback: Create users with placeholder emails
             const usersWithPlaceholderEmails = userProfiles.map(profile => ({
               ...profile,
               email: `user-${profile.id.substring(0, 8)}@example.com`,
@@ -181,10 +184,11 @@ const UserManagement: React.FC = () => {
             return;
           }
           
-          // Map emails to profiles if userData exists and has users
-          if (userData && userData.users) {
+          const typedUserData = userData as SupabaseUserData;
+          
+          if (typedUserData && typedUserData.users && Array.isArray(typedUserData.users)) {
             const usersWithEmail: User[] = userProfiles.map(profile => {
-              const authUser = userData.users.find(u => u.id === profile.id);
+              const authUser = typedUserData.users.find(u => u.id === profile.id);
               
               return {
                 ...profile,
@@ -201,7 +205,6 @@ const UserManagement: React.FC = () => {
         } catch (e) {
           console.error("Error processing user data:", e);
           
-          // Final fallback
           const usersWithoutEmails = userProfiles.map(profile => ({
             ...profile,
             email: `user-${profile.id.substring(0, 8)}@example.com`,
@@ -254,7 +257,6 @@ const UserManagement: React.FC = () => {
         return;
       }
 
-      // User was added via the auth API, the trigger will handle profile creation
       toast({
         title: "User added successfully",
         description: `${data.firstName} ${data.lastName} has been added as a ${data.role}.`,
@@ -275,7 +277,6 @@ const UserManagement: React.FC = () => {
     if (!selectedUser) return;
 
     try {
-      // Update profile in the database
       const { error: updateError } = await supabase
         .from("profiles")
         .update({
@@ -296,7 +297,6 @@ const UserManagement: React.FC = () => {
         return;
       }
 
-      // If password was provided, update user's password
       if (data.password) {
         const { error: passwordError } = await supabase.auth.admin.updateUserById(
           selectedUser.id,
@@ -441,7 +441,6 @@ const UserManagement: React.FC = () => {
           )}
         </Card>
 
-        {/* Add User Dialog */}
         <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
@@ -580,7 +579,6 @@ const UserManagement: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Edit User Dialog */}
         <Dialog open={openEditDialog} onOpenChange={setOpenEditDialog}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
