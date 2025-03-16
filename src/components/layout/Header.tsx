@@ -28,7 +28,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
-  const { t, changeLanguage, currentLanguage } = useLanguage();
+  const { t, setLanguage, language } = useLanguage();
   const { user, profile, signOut, isAdmin } = useAuth();
 
   const getInitials = () => {
@@ -79,9 +79,9 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
             {languages.map((lang) => (
               <DropdownMenuItem
                 key={lang.code}
-                onClick={() => changeLanguage(lang.code)}
+                onClick={() => setLanguage(lang.code)}
                 className={
-                  currentLanguage === lang.code
+                  language === lang.code
                     ? "bg-accent text-accent-foreground"
                     : ""
                 }
@@ -120,14 +120,18 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem as={Link} to="/settings">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>{t("settings")}</span>
+              <DropdownMenuItem asChild>
+                <Link to="/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>{t("settings")}</span>
+                </Link>
               </DropdownMenuItem>
               {isAdmin && (
-                <DropdownMenuItem as={Link} to="/users">
-                  <Users className="mr-2 h-4 w-4" />
-                  <span>{t("user_management")}</span>
+                <DropdownMenuItem asChild>
+                  <Link to="/users">
+                    <Users className="mr-2 h-4 w-4" />
+                    <span>{t("user_management")}</span>
+                  </Link>
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />

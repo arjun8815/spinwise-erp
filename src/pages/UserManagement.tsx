@@ -46,14 +46,28 @@ import {
 import { Input } from "@/components/ui/input";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
+type Language = "english" | "tamil" | "telugu" | "hindi" | "kannada";
+type UserRole = "admin" | "manager" | "employee";
+
 type User = {
   id: string;
   email: string;
   first_name: string | null;
   last_name: string | null;
   phone: string | null;
-  role: "admin" | "manager" | "employee";
+  role: UserRole;
+  preferred_language: Language;
+};
+
+type UserProfileData = {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  phone: string | null;
+  role: UserRole;
   preferred_language: string;
+  created_at?: string;
+  updated_at?: string;
 };
 
 const userFormSchema = z.object({
@@ -61,8 +75,8 @@ const userFormSchema = z.object({
   firstName: z.string().min(1, { message: "First name is required" }),
   lastName: z.string().min(1, { message: "Last name is required" }),
   phone: z.string().min(10, { message: "Please enter a valid phone number" }),
-  role: z.enum(["admin", "manager", "employee"]),
-  language: z.enum(["english", "tamil", "telugu", "hindi", "kannada"]),
+  role: z.enum(["admin", "manager", "employee"] as const),
+  language: z.enum(["english", "tamil", "telugu", "hindi", "kannada"] as const),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }).optional(),
 });
 
@@ -78,7 +92,7 @@ const UserManagement: React.FC = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [roleFilterValue, setRoleFilterValue] = useState<string | undefined>(undefined);
+  const [roleFilterValue, setRoleFilterValue] = useState<UserRole | undefined>(undefined);
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -128,7 +142,10 @@ const UserManagement: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      let query = supabase.from("profiles").select("*");
+      let query = supabase
+        .from("profiles")
+        .select("*")
+        .order('created_at', { ascending: false });
       
       if (roleFilterValue) {
         query = query.eq("role", roleFilterValue);
@@ -141,7 +158,35 @@ const UserManagement: React.FC = () => {
         return;
       }
       
-      setUsers(data as User[]);
+      // Get user emails from auth.users
+      const userProfiles = data as UserProfileData[];
+      const userIds = userProfiles.map(profile => profile.id);
+      
+      // Only fetch emails if we have user profiles
+      if (userIds.length > 0) {
+        const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+        
+        if (userError) {
+          console.error("Error fetching user emails:", userError);
+          return;
+        }
+        
+        // Map emails to profiles
+        const usersWithEmail: User[] = userProfiles.map(profile => {
+          const authUser = userData.users.find(u => u.id === profile.id);
+          
+          return {
+            ...profile,
+            email: authUser?.email || 'No email found',
+            preferred_language: (profile.preferred_language as Language) || 'english',
+            role: (profile.role as UserRole) || 'employee'
+          };
+        });
+        
+        setUsers(usersWithEmail);
+      } else {
+        setUsers([]);
+      }
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -296,13 +341,13 @@ const UserManagement: React.FC = () => {
               <span className="text-sm text-muted-foreground">{t("filter_by_role")}:</span>
               <Select
                 value={roleFilterValue}
-                onValueChange={(value) => setRoleFilterValue(value || undefined)}
+                onValueChange={(value: UserRole | undefined) => setRoleFilterValue(value)}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder={t("all_roles")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("all_roles")}</SelectItem>
+                  <SelectItem value={undefined}>{t("all_roles")}</SelectItem>
                   <SelectItem value="admin">{t("admin")}</SelectItem>
                   <SelectItem value="manager">{t("manager")}</SelectItem>
                   <SelectItem value="employee">{t("employee")}</SelectItem>

@@ -3,9 +3,11 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
+type UserRole = "admin" | "manager" | "employee";
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  allowedRoles?: ("admin" | "manager" | "employee")[];
+  allowedRoles?: UserRole[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
@@ -30,7 +32,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // If user doesn't have the required role, redirect to dashboard with proper message
-  if (profile && !allowedRoles.includes(profile.role)) {
+  if (profile && !allowedRoles.includes(profile.role as UserRole)) {
     return <Navigate to="/" replace />;
   }
 
