@@ -60,6 +60,7 @@ const Auth: React.FC = () => {
   const { signIn, signUp, verifyOtp, session } = useAuth();
   const [activeTab, setActiveTab] = useState<"signin" | "signup" | "otp">("signin");
   const [verificationEmail, setVerificationEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Redirect if already authenticated
   React.useEffect(() => {
@@ -100,37 +101,52 @@ const Auth: React.FC = () => {
   });
 
   const onLoginSubmit = async (data: LoginFormValues) => {
-    const { error } = await signIn(data.email, data.password);
-    
-    if (!error) {
-      navigate("/");
+    setLoading(true);
+    try {
+      const { error } = await signIn(data.email, data.password);
+      
+      if (!error) {
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   const onSignupSubmit = async (data: SignupFormValues) => {
-    const { error } = await signUp(
-      data.email,
-      data.password,
-      {
-        first_name: data.firstName,
-        last_name: data.lastName,
-        phone: data.phone,
-        preferred_language: data.language,
-        role: data.role as "admin" | "manager" | "employee",
+    setLoading(true);
+    try {
+      const { error } = await signUp(
+        data.email,
+        data.password,
+        {
+          first_name: data.firstName,
+          last_name: data.lastName,
+          phone: data.phone,
+          preferred_language: data.language,
+          role: data.role,
+        }
+      );
+      
+      if (!error) {
+        setVerificationEmail(data.email);
+        setActiveTab("otp");
       }
-    );
-    
-    if (!error) {
-      setVerificationEmail(data.email);
-      setActiveTab("otp");
+    } finally {
+      setLoading(false);
     }
   };
 
   const onOtpSubmit = async (data: OtpFormValues) => {
-    const { error } = await verifyOtp(verificationEmail, data.otp);
-    
-    if (!error) {
-      navigate("/");
+    setLoading(true);
+    try {
+      const { error } = await verifyOtp(verificationEmail, data.otp);
+      
+      if (!error) {
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -199,8 +215,8 @@ const Auth: React.FC = () => {
                       )}
                     />
                     
-                    <Button type="submit" className="w-full">
-                      {t("sign_in")}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Signing in..." : t("sign_in")}
                     </Button>
                   </form>
                 </Form>
@@ -329,8 +345,8 @@ const Auth: React.FC = () => {
                       )}
                     />
                     
-                    <Button type="submit" className="w-full">
-                      {t("sign_up")}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Signing up..." : t("sign_up")}
                     </Button>
                   </form>
                 </Form>
@@ -367,8 +383,8 @@ const Auth: React.FC = () => {
                     )}
                   />
                   
-                  <Button type="submit" className="w-full">
-                    {t("verify")}
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? "Verifying..." : t("verify")}
                   </Button>
                   
                   <Button 

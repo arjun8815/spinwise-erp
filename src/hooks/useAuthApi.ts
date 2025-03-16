@@ -36,16 +36,26 @@ export const useAuthApi = () => {
     try {
       console.log("Signing up with data:", { email, userData });
       
+      // Ensure role is one of the allowed values
+      const validRole = ["admin", "manager", "employee"].includes(userData.role) 
+        ? userData.role 
+        : "employee";
+        
+      // Ensure preferred_language has a valid value
+      const validLanguage = ["english", "tamil", "telugu", "hindi", "kannada"].includes(userData.preferred_language)
+        ? userData.preferred_language
+        : "english";
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            first_name: userData.first_name,
-            last_name: userData.last_name,
-            phone: userData.phone,
-            preferred_language: userData.preferred_language || "english",
-            role: userData.role || "employee",
+            first_name: userData.first_name || "",
+            last_name: userData.last_name || "",
+            phone: userData.phone || "",
+            preferred_language: validLanguage,
+            role: validRole,
           },
         },
       });
