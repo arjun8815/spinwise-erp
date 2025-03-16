@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,7 +19,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -164,26 +162,55 @@ const UserManagement: React.FC = () => {
       
       // Only fetch emails if we have user profiles
       if (userIds.length > 0) {
-        const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
-        
-        if (userError) {
-          console.error("Error fetching user emails:", userError);
-          return;
-        }
-        
-        // Map emails to profiles
-        const usersWithEmail: User[] = userProfiles.map(profile => {
-          const authUser = userData.users.find(u => u.id === profile.id);
+        // Attempt to get user data
+        try {
+          const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
           
-          return {
+          if (userError) {
+            console.error("Error fetching user emails:", userError);
+            
+            // Fallback: Create users with placeholder emails
+            const usersWithPlaceholderEmails = userProfiles.map(profile => ({
+              ...profile,
+              email: `user-${profile.id.substring(0, 8)}@example.com`,
+              preferred_language: (profile.preferred_language as Language) || 'english',
+              role: (profile.role as UserRole) || 'employee'
+            }));
+            
+            setUsers(usersWithPlaceholderEmails);
+            return;
+          }
+          
+          // Map emails to profiles if userData exists and has users
+          if (userData && userData.users) {
+            const usersWithEmail: User[] = userProfiles.map(profile => {
+              const authUser = userData.users.find(u => u.id === profile.id);
+              
+              return {
+                ...profile,
+                email: authUser?.email || `user-${profile.id.substring(0, 8)}@example.com`,
+                preferred_language: (profile.preferred_language as Language) || 'english',
+                role: (profile.role as UserRole) || 'employee'
+              };
+            });
+            
+            setUsers(usersWithEmail);
+          } else {
+            throw new Error("No user data returned");
+          }
+        } catch (e) {
+          console.error("Error processing user data:", e);
+          
+          // Final fallback
+          const usersWithoutEmails = userProfiles.map(profile => ({
             ...profile,
-            email: authUser?.email || 'No email found',
+            email: `user-${profile.id.substring(0, 8)}@example.com`,
             preferred_language: (profile.preferred_language as Language) || 'english',
             role: (profile.role as UserRole) || 'employee'
-          };
-        });
-        
-        setUsers(usersWithEmail);
+          }));
+          
+          setUsers(usersWithoutEmails);
+        }
       } else {
         setUsers([]);
       }

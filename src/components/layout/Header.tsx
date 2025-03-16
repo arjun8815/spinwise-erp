@@ -27,6 +27,9 @@ interface HeaderProps {
   toggleSidebar: () => void;
 }
 
+// Define the Language type to match the context
+type Language = "english" | "tamil" | "telugu" | "hindi" | "kannada";
+
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   const { t, setLanguage, language } = useLanguage();
   const { user, profile, signOut, isAdmin } = useAuth();
@@ -46,11 +49,11 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   };
 
   const languages = [
-    { code: "english", label: "English" },
-    { code: "tamil", label: "தமிழ்" },
-    { code: "telugu", label: "తెలుగు" },
-    { code: "hindi", label: "हिंदी" },
-    { code: "kannada", label: "ಕನ್ನಡ" },
+    { code: "english" as Language, label: "English" },
+    { code: "tamil" as Language, label: "தமிழ்" },
+    { code: "telugu" as Language, label: "తెలుగు" },
+    { code: "hindi" as Language, label: "हिंदी" },
+    { code: "kannada" as Language, label: "ಕನ್ನಡ" },
   ];
 
   return (
