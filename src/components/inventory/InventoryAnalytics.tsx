@@ -20,6 +20,7 @@ import {
   PieChart,
   Pie,
   Cell,
+  TooltipProps,
 } from "recharts";
 
 // Sample data for inventory analytics
@@ -51,6 +52,14 @@ const turnoverRateData = [
 
 const InventoryAnalytics: React.FC = () => {
   const { t } = useLanguage();
+
+  // Format number for tooltip to handle both string and number types
+  const formatNumber = (value: any): string => {
+    if (typeof value === 'number') {
+      return value.toFixed(1);
+    }
+    return String(value);
+  };
 
   return (
     <div className="space-y-6">
@@ -151,7 +160,7 @@ const InventoryAnalytics: React.FC = () => {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis domain={[0, 5]} />
-                  <Tooltip formatter={(value) => value.toFixed(1)} />
+                  <Tooltip formatter={(value) => formatNumber(value)} />
                   <Bar
                     dataKey="rate"
                     name={t("turnover_rate")}
