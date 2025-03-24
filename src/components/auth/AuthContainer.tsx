@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Factory } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ContactSupportButton from "./ContactSupportButton";
 
 interface AuthContainerProps {
   activeTab: string;
@@ -50,6 +51,9 @@ const AuthContainer: React.FC<AuthContainerProps> = ({
           ) : (
             children
           )}
+          
+          {/* Add the ContactSupportButton component */}
+          <ContactSupportButton />
         </CardContent>
       </Card>
     </div>
