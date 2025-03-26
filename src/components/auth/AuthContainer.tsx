@@ -18,7 +18,7 @@ const AuthContainer: React.FC<AuthContainerProps> = ({
   activeTab,
   title,
   children,
-  showTabs = true,
+  showTabs = false,
   onTabChange
 }) => {
   const { t } = useLanguage();
