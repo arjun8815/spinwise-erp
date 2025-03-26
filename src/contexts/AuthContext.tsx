@@ -1,57 +1,51 @@
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Session, User } from "@supabase/supabase-js";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { AuthContextType, UserProfile } from "@/types/auth.types";
-import { useAuthApi } from "@/hooks/useAuthApi";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Mock user data for development
+const mockUser = {
+  id: "mock-user-id",
+  email: "admin@example.com",
+  app_metadata: {},
+  user_metadata: {},
+  aud: "authenticated",
+  created_at: "",
+};
+
+const mockProfile: UserProfile = {
+  id: "mock-user-id",
+  first_name: "Admin",
+  last_name: "User",
+  phone: "+1234567890",
+  preferred_language: "english",
+  role: "admin",
+};
+
+// Mock session
+const mockSession = {
+  access_token: "mock-token",
+  token_type: "bearer",
+  expires_in: 3600,
+  refresh_token: "mock-refresh-token",
+  user: mockUser,
+  expires_at: 9999999999,
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const authApi = useAuthApi();
+  const [session, setSession] = useState(mockSession);
+  const [user, setUser] = useState(mockUser);
+  const [profile, setProfile] = useState<UserProfile>(mockProfile);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Initialize session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      }
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const fetchUserProfile = async (userId: string) => {
-    const profileData = await authApi.fetchUserProfile(userId);
-    if (profileData) {
-      setProfile(profileData);
-    }
-  };
+  // Mock authentication functions
+  const signIn = async () => ({ error: null });
+  const signUp = async () => ({ data: null, error: null });
+  const signOut = async () => {};
+  const verifyOtp = async () => ({ error: null });
 
   const isAdmin = profile?.role === "admin";
   const isManager = profile?.role === "manager";
@@ -62,6 +56,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return allowedRoles.includes(profile.role);
   };
 
+  useEffect(() => {
+    // Simulate loading complete
+    setLoading(false);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -69,10 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         user,
         profile,
         loading,
-        signIn: authApi.signIn,
-        signUp: authApi.signUp,
-        signOut: authApi.signOut,
-        verifyOtp: authApi.verifyOtp,
+        signIn,
+        signUp,
+        signOut,
+        verifyOtp,
         isAdmin,
         isManager,
         isEmployee,

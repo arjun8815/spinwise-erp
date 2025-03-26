@@ -1,7 +1,6 @@
 
 import React from "react";
-import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AuthContainer from "@/components/auth/AuthContainer";
 import { Button } from "@/components/ui/button";
@@ -9,12 +8,6 @@ import { Button } from "@/components/ui/button";
 const Auth: React.FC = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { session } = useAuth();
-
-  // Redirect if already authenticated
-  if (session) {
-    return <Navigate to="/" />;
-  }
 
   return (
     <AuthContainer 

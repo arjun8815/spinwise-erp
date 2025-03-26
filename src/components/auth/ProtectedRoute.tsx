@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 type UserRole = "admin" | "manager" | "employee";
@@ -14,8 +13,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   allowedRoles = ["admin", "manager", "employee"],
 }) => {
-  const { session, loading, profile } = useAuth();
-  const location = useLocation();
+  const { loading } = useAuth();
 
   if (loading) {
     // Show loading spinner while checking authentication
@@ -26,16 +24,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // If not authenticated, redirect to login
-  if (!session) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
-  }
-
-  // If user doesn't have the required role, redirect to dashboard with proper message
-  if (profile && !allowedRoles.includes(profile.role as UserRole)) {
-    return <Navigate to="/" replace />;
-  }
-
+  // With mock auth context, users always have access
   return <>{children}</>;
 };
 
